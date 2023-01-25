@@ -3,7 +3,7 @@ package users
 import (
 	"errors"
 	db "github.com/pganguli/hnews/internal/db"
-	"github.com/pganguli/hnews/pkg/hash"
+	hash "github.com/pganguli/hnews/pkg/hash/pbkdf2"
 	"gorm.io/gorm"
 	"log"
 )

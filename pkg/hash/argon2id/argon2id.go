@@ -1,10 +1,10 @@
-package hash
+package argon2id
 
 import (
-	"github.com/alexedwards/argon2id"
+	a "github.com/alexedwards/argon2id"
 )
 
-var params = &argon2id.Params{
+var params = &a.Params{
 	Memory:      64 * 1024, // m
 	Iterations:  1,         // t
 	Parallelism: 2,         // p
@@ -14,12 +14,12 @@ var params = &argon2id.Params{
 
 // HashPassword hashes given password
 func HashPassword(password string) (string, error) {
-	hash, err := argon2id.CreateHash(password, params)
+	hash, err := a.CreateHash(password, params)
 	return hash, err
 }
 
 // CheckPassword hash compares raw password with it's hashed values
-func CheckPasswordHash(password, hash string) (bool, error) {
-	match, err := argon2id.ComparePasswordAndHash(password, hash)
+func CheckPasswordHash(password string, hash string) (bool, error) {
+	match, err := a.ComparePasswordAndHash(password, hash)
 	return match, err
 }
