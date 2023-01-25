@@ -18,6 +18,12 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+func panicHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		panic("Test panic")
+	}
+}
+
 const defaultPort = "8080"
 
 func main() {
@@ -36,11 +42,12 @@ func main() {
 
 	router := chi.NewRouter()
 
+	router.Use(middleware.Recoverer)
 	router.Use(middleware.Logger)
 	router.Use(auth.Authenticate)
-	router.Use(middleware.Recoverer)
 
 	router.Use(middleware.Heartbeat("/ping"))
+	router.Handle("/panic", panicHandler())
 	router.Handle("/graphql", gql_handler)
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 
