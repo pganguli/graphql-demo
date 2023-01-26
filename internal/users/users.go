@@ -3,7 +3,7 @@ package users
 import (
 	"errors"
 	db "github.com/pganguli/hnews/internal/db"
-	hash "github.com/pganguli/hnews/pkg/hash/pbkdf2"
+	hash "github.com/pganguli/hnews/pkg/hash/argon2id"
 	"gorm.io/gorm"
 	"log"
 )
@@ -15,7 +15,7 @@ type User struct {
 }
 
 func (user *User) Create() error {
-	hashedPassword, err := hash.HashPassword(user.Password)
+	hashedPassword, err := hash.CreateHash(user.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func (user *User) Authenticate() (bool, error) {
 		return false, err
 	}
 
-	match, err := hash.CheckPasswordHash(user.Password, hashedPassword)
+	match, err := hash.ComparePasswordAndHash(user.Password, hashedPassword)
 	if err != nil {
 		log.Fatal(err)
 		return false, err

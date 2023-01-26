@@ -7,17 +7,15 @@ import (
 var params = &p.Params{
 	Iterations:  210000,
 	SaltLength:  16,
-	KeyLength:   32,
+	KeyLength:   64,
 }
 
 // HashPassword hashes given password
-func HashPassword(password string) (string, error) {
-	hash, err := p.CreateHash(password, params)
-	return hash, err
+func CreateHash(password string) (string, error) {
+	return p.CreateHash(password, params)
 }
 
 // CheckPassword hash compares raw password with it's hashed values
-func CheckPasswordHash(password string, hash string) (bool, error) {
-	match, err := p.ComparePasswordAndHash(password, hash)
-	return match, err
+func ComparePasswordAndHash(password string, hash string) (bool, error) {
+	return p.ComparePasswordAndHash(password, hash)
 }

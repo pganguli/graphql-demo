@@ -13,13 +13,11 @@ var params = &a.Params{
 }
 
 // HashPassword hashes given password
-func HashPassword(password string) (string, error) {
-	hash, err := a.CreateHash(password, params)
-	return hash, err
+func CreateHash(password string) (string, error) {
+	return a.CreateHash(password, params)
 }
 
 // CheckPassword hash compares raw password with it's hashed values
-func CheckPasswordHash(password string, hash string) (bool, error) {
-	match, err := a.ComparePasswordAndHash(password, hash)
-	return match, err
+func ComparePasswordAndHash(password string, hash string) (bool, error) {
+	return a.ComparePasswordAndHash(password, hash)
 }
