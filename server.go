@@ -33,17 +33,17 @@ func main() {
 	}
 
 	db.Open()
-    err := db.DB.AutoMigrate(&links.Link{}, &users.User{})
-    if err != nil {
-        log.Fatal(err)
-    }
+	err := db.DB.AutoMigrate(&links.Link{}, &users.User{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	gql_handler := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
 	router := chi.NewRouter()
 
-	router.Use(middleware.Recoverer)
 	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 	router.Use(auth.Authenticate)
 
 	router.Use(middleware.Heartbeat("/ping"))
