@@ -10,7 +10,7 @@ tidy:
 	go mod tidy
 
 test:
-	./test.sh
+	go test -race .
 
 fmt:
 	gofmt -l -w **/*.go
