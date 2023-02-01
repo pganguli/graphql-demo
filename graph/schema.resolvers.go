@@ -23,20 +23,20 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) 
 		return &model.Link{}, fmt.Errorf("access denied")
 	}
 
-	grahpqlUser := &model.User{
-		ID:       strconv.Itoa(user.ID),
-		Username: user.Username,
-	}
-
 	var link links.Link
 
 	link.Title = input.Title
 	link.Address = input.Address
-	link.User = user
+	link.User = *user
 
 	linkID, err := link.Save()
 	if err != nil {
 		return &model.Link{}, err
+	}
+
+	grahpqlUser := &model.User{
+		ID:       strconv.Itoa(link.User.ID),
+		Username: link.User.Username,
 	}
 
 	return &model.Link{ID: strconv.Itoa(linkID), Title: link.Title, Address: link.Address, User: grahpqlUser}, nil

@@ -13,7 +13,7 @@ type Link struct {
 	Title   string `gorm:"not null"`
 	Address string `gorm:"not null"`
 	UserID  int
-	User    *users.User `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	User    users.User `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 func (link Link) Save() (int, error) {
@@ -24,7 +24,7 @@ func (link Link) Save() (int, error) {
 func GetAll() []Link {
 	var links []Link
 
-	result := db.DB.Find(&links)
+	result := db.DB.Preload("User").Find(&links)
 	if err := result.Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Print(err)
