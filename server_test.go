@@ -73,10 +73,10 @@ func CreateUser(username string, password string) (response GQL_Response) {
 	return GqlQuery(data, nil)
 }
 
-func CreateLink(title string, password string, bearerToken httpHeaders) (response GQL_Response) {
+func CreateLink(title string, address string, bearerToken httpHeaders) (response GQL_Response) {
 	operationName := "create_link"
 	query := fmt.Sprintf("mutation %v{createLink(input:{title:\"%v\",address:\"%v\"}){id title address user{id username}}}",
-		operationName, title, password)
+		operationName, title, address)
 
 	data := GQL_Query{
 		OperationName: operationName,
@@ -90,6 +90,32 @@ func ListLinks() (response GQL_Response) {
 	operationName := "list_links"
 	query := fmt.Sprintf("query %v{links{id title address user{id username}}}",
 		operationName)
+
+	data := GQL_Query{
+		OperationName: operationName,
+		Query:         query,
+	}
+
+	return GqlQuery(data, nil)
+}
+
+func Login(username string, password string) (response GQL_Response) {
+	operationName := "login"
+	query := fmt.Sprintf("mutation %v{login(input:{username:\"%v\",password:\"%v\"})}",
+		operationName, username, password)
+
+	data := GQL_Query{
+		OperationName: operationName,
+		Query:         query,
+	}
+
+	return GqlQuery(data, nil)
+}
+
+func RefreshToken(token string) (response GQL_Response) {
+	operationName := "refresh_token"
+	query := fmt.Sprintf("mutation %v{refreshToken(input:{token:\"%v\"})}",
+		operationName, token)
 
 	data := GQL_Query{
 		OperationName: operationName,
@@ -116,6 +142,18 @@ func TestCreateUser(t *testing.T) {
 	}
 	if userName != "user0" {
 		t.Errorf("Claimed user name is incorrect: %q", userName)
+	}
+
+	duplicate_user_text := "ERROR: duplicate key value violates unique constraint \"users_username_key\" (SQLSTATE 23505)"
+
+	response = CreateUser("user0", "pa$$word")
+	if response.Errors == nil {
+		t.Errorf("Did not get expected error: %q", duplicate_user_text)
+	} else {
+		message := response.Errors[0]["message"].(string)
+		if message != duplicate_user_text {
+			t.Errorf("Expected error: %q\nGot error: %q", duplicate_user_text, message)
+		}
 	}
 }
 
@@ -238,5 +276,43 @@ func TestListLinks(t *testing.T) {
 
 	if count != 5 {
 		t.Errorf("Expected 5 links; got: %d", count)
+	}
+}
+
+func TestLogin(t *testing.T) {
+	response := CreateUser("user3", "pa$$word")
+	if response.Errors != nil {
+		t.Fatalf("%+v", response.Errors)
+	}
+
+	authToken := response.Data["createUser"].(string)
+
+	response = Login("user3", "pa$$word")
+	if response.Errors != nil {
+		t.Fatalf("%+v", response.Errors)
+	} else {
+		loginToken := response.Data["login"].(string)
+		if loginToken != authToken {
+			t.Errorf("Expected token: %q\nGot token: %q", authToken, loginToken)
+		}
+	}
+}
+
+func TestRefreshToken(t *testing.T) {
+	response := CreateUser("user4", "pa$$word")
+	if response.Errors != nil {
+		t.Fatalf("%+v", response.Errors)
+	}
+
+	authToken := response.Data["createUser"].(string)
+
+	response = RefreshToken(authToken)
+	if response.Errors != nil {
+		t.Fatalf("%+v", response.Errors)
+	} else {
+		refreshedToken := response.Data["refreshToken"].(string)
+		if refreshedToken != authToken {
+			t.Errorf("Expected token: %q\nGot token: %q", authToken, refreshedToken)
+		}
 	}
 }
